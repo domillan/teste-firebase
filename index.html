@@ -1,0 +1,139 @@
+<head>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+</head>
+
+<body>
+	<button id='google'>Login com Google</button><br><br>
+	<div id="recaptcha"></div>
+
+	<button id='facebook'>Login com Facebook</button><br><br>
+
+	<button id='ver'>VER</button><br><br>
+	
+	<button id='sair'>SAIR</button><br><br>
+	<div id='dados'></div>
+</body>
+<!-- The core Firebase JS SDK is always required and must be listed first -->
+<script src="https://www.gstatic.com/firebasejs/7.18.0/firebase-app.js"></script>
+
+<!-- TODO: Add SDKs for Firebase products that you want to use
+     https://firebase.google.com/docs/web/setup#available-libraries -->
+<script src="https://www.gstatic.com/firebasejs/7.18.0/firebase-analytics.js"></script>
+
+  <!-- Add Firebase products that you want to use -->
+  <script src="https://www.gstatic.com/firebasejs/7.18.0/firebase-auth.js"></script>
+
+<script>
+  // Your web app's Firebase configuration
+  var firebaseConfig = {
+    apiKey: "AIzaSyBLhWlIIQ89iqymER1DYd8-aXhJCsiAFyk",
+    authDomain: "my-firstgfhsetherct.firebaseapp.com",
+    databaseURL: "https://my-firstgfhsetherct.firebaseio.com",
+    projectId: "my-firstgfhsetherct",
+    storageBucket: "my-firstgfhsetherct.appspot.com",
+    messagingSenderId: "499711681109",
+    appId: "1:499711681109:web:76e1e05dd9b1150f496adc",
+    measurementId: "G-JWFQTXE737"
+  };
+  // Initialize Firebase
+  firebase.initializeApp(firebaseConfig);
+  firebase.analytics();
+  firebase.auth().useDeviceLanguage();
+
+//firebase.auth().signInAnonymously();
+var auth = firebase.auth();  
+var googleProvider = new firebase.auth.GoogleAuthProvider();
+var facebookProvider = new firebase.auth.FacebookAuthProvider();
+var twitterProvider = new firebase.auth.TwitterAuthProvider();
+var githubProvider = new firebase.auth.GithubAuthProvider();
+
+firebase.auth().onAuthStateChanged(function(user) {
+  if (user) {
+    ver();
+  } else {
+    alert('usuario deslogado');
+  }
+});
+$('#google').click(function(){
+firebase.auth().signInWithPopup(googleProvider);
+});
+
+$('#facebook').click(function(){
+firebase.auth().signInWithRedirect(facebookProvider)
+  .then(/* ... */)
+  .catch(/* ... */);	
+});
+
+$('#ver').click(ver);
+
+window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha', {
+  'callback': (response) => {
+    alert(response);
+  },
+  'expired-callback': () => {
+    // Response expired. Ask user to solve reCAPTCHA again.
+    // ...
+  }
+})
+
+window.recaptchaVerifier.render()
+function ver(){
+	var user = firebase.auth().currentUser;
+	
+	$("#dados").text('');
+	if (user != null) {
+	  user.providerData.forEach(function (profile) {
+		$("#dados").append("Provedor: " + profile.providerId);
+		$("#dados").append("<br>Provedor UID: " + profile.uid);
+		$("#dados").append("<br>UID: " + user.uid);
+		$("#dados").append("<br>Nme: " + profile.displayName);
+		$("#dados").append("<br>Email: " + profile.email);
+		$("#dados").append("<br>Foto: <a href='" + profile.photoURL+"'> Acessar</a>");
+		
+	  });
+	  firebase.auth().currentUser.getIdToken()
+  .then((idToken) => {
+    // idToken can be passed back to server.
+  })
+  .catch((error) => {
+    // Error occurred.
+  });
+	}
+	else
+	{
+		$("#dados").append("Faça o login");
+	}
+}
+
+$('#sair').click(function(){
+firebase.auth().signOut().then(function() {
+  alert('usuario deslogado');
+}).catch(function(error) {
+  // An error happened.
+});
+});
+
+
+auth.getRedirectResult().then(function(result) {
+  if (result.credential) {
+    alert('usuario logado');
+    var credential = result.credential;
+    var user = result.user;
+  }
+}).catch(function(error) {
+  alert('a');
+});
+
+
+$('#logar').click(function(){
+firebase.auth().signInWithCustomToken($('#token').val()).catch(function(error) {
+  // Handle Errors here.
+  var errorCode = error.code;
+  var errorMessage = error.message;
+  // ...
+});	
+});
+
+
+
+</script>
