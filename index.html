@@ -4,14 +4,19 @@
 
 <body>
 	<button id='google'>Login com Google</button><br><br>
-	<div id="recaptcha"></div>
 
 	<button id='facebook'>Login com Facebook</button><br><br>
 
-	<button id='ver'>VER</button><br><br>
-	
 	<button id='sair'>SAIR</button><br><br>
+	
 	<div id='dados'></div>
+	
+	<button id='googleR'>relogin com Google</button><br><br>
+
+	<input id='tokeni'>
+
+	<button id='facebookR'>relogin com Facebook</button><br><br>
+	
 </body>
 <!-- The core Firebase JS SDK is always required and must be listed first -->
 <script src="https://www.gstatic.com/firebasejs/7.18.0/firebase-app.js"></script>
@@ -43,43 +48,37 @@
 //firebase.auth().signInAnonymously();
 var auth = firebase.auth();  
 var googleProvider = new firebase.auth.GoogleAuthProvider();
+googleProvider.setCustomParameters({
+  'prompt': 'select_account'
+});
 var facebookProvider = new firebase.auth.FacebookAuthProvider();
+facebookProvider.setCustomParameters({
+  'prompt': 'select_account'
+});
 var twitterProvider = new firebase.auth.TwitterAuthProvider();
-var githubProvider = new firebase.auth.GithubAuthProvider();
+twitterProvider.setCustomParameters({
+  'prompt': 'select_account'
+});
 
 firebase.auth().onAuthStateChanged(function(user) {
-  if (user) {
-    ver();
-  } else {
-    alert('usuario deslogado');
-  }
+  ver();
 });
 $('#google').click(function(){
-firebase.auth().signInWithPopup(googleProvider);
+loginProvedor(googleProvider);
 });
 
 $('#facebook').click(function(){
-firebase.auth().signInWithRedirect(facebookProvider)
-  .then(/* ... */)
-  .catch(/* ... */);	
+loginProvedor(facebookProvider)
 });
 
-$('#ver').click(ver);
 
-window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha', {
-  'callback': (response) => {
-    alert(response);
-  },
-  'expired-callback': () => {
-    // Response expired. Ask user to solve reCAPTCHA again.
-    // ...
-  }
-})
+function loginProvedor(provedor)
+{
+	firebase.auth().signInWithRedirect(provedor);
+}
 
-window.recaptchaVerifier.render()
-function ver(){
-	var user = firebase.auth().currentUser;
-	
+
+function ver(user = firebase.auth().currentUser){	
 	$("#dados").text('');
 	if (user != null) {
 	  user.providerData.forEach(function (profile) {
@@ -107,21 +106,38 @@ function ver(){
 
 $('#sair').click(function(){
 firebase.auth().signOut().then(function() {
-  alert('usuario deslogado');
+  ver();
 }).catch(function(error) {
   // An error happened.
 });
 });
 
+$('#googleR').click(function(){
+reLoginProvedor(token, googleProvider);
+});
+
+$('#facebookR').click(function(){
+reLoginProvedor(tokeni.value, facebookProvider)
+});
+
+function reLoginProvedor(token, provedor)
+{
+	var cred = provedor.credential(token)
+	alert('a');
+	auth.signInWithCredential(cred);
+	ver();
+}
+
 
 auth.getRedirectResult().then(function(result) {
   if (result.credential) {
-    alert('usuario logado');
     var credential = result.credential;
-    var user = result.user;
-  }
+	}
+	var user = result.user;
+    ver();
+  
 }).catch(function(error) {
-  alert('a');
+  ver();
 });
 
 
